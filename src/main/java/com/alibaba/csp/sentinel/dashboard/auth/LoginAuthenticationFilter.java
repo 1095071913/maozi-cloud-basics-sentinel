@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -51,6 +52,8 @@ import java.util.List;
  */
 @Component
 public class LoginAuthenticationFilter implements Filter {
+	
+	AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     private static final String URL_SUFFIX_DOT = ".";
 
@@ -88,6 +91,15 @@ public class LoginAuthenticationFilter implements Filter {
         if (authFilterExcludeUrls.contains(servletPath)) {
             chain.doFilter(request, response);
             return;
+        }
+        
+        for(String authFilterExcludeUrl:authFilterExcludeUrls) {
+        	
+        	if (authFilterExcludeUrl.equals(servletPath) || antPathMatcher.match(authFilterExcludeUrl,servletPath)) {
+                chain.doFilter(request, response);
+                return;
+            }
+        	
         }
 
         // Exclude the urls with suffixes which needn't auth
